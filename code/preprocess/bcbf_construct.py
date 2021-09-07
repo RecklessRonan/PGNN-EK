@@ -1,7 +1,7 @@
 import psycopg2
 import pandas as pd
 
-# you must set your postgres dataset configuration
+# you must set your postgres database configuration
 database = ''
 user = ''
 password = ''

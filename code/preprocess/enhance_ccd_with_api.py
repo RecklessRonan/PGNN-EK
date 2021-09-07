@@ -1,8 +1,9 @@
-from threading import main_thread
 import javalang
 from javalang.ast import Node
+from javalang.parser import parse
 import pandas as pd
-from multiprocessing import Process, cpu_count, Manager, Pool
+from multiprocessing import Manager, Pool
+import argparse
 
 
 def get_token(node):
@@ -64,7 +65,15 @@ def parse_program(func):
     return parser.parse_member_declaration()
 
 
-dataset_url = '../../data/BCB-F/'
+parser = argparse.ArgumentParser(description='Process different dataset')
+parser.add_argument('--dataset', type=str, help='BCB or BCB-F')
+args = parser.parse_args()
+if args.dataset == 'BCB':
+    dataset_url = '../../data/BCB/'
+elif args.dataset == 'BCB-F':
+    dataset_url = '../../data/BCB-F/'
+else:
+    print('Wrong dataset name')
 data_url = dataset_url + 'data.jsonl'
 data = pd.read_json(path_or_buf=data_url, lines=True)
 java_api_url = '../../data/java-api/java_api.csv'
