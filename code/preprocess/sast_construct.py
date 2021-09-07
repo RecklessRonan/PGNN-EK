@@ -1,10 +1,8 @@
-import pandas as pd
 import javalang
 from javalang.ast import Node
-import torch
 from transformers import RobertaTokenizer, RobertaConfig, RobertaModel, DataCollatorWithPadding
 from anytree import AnyNode
-from torch_geometric.data import Data
+from tqdm import tqdm
 
 
 # use javalang to generate ASTs and depth-first traverse to generate ast nodes corpus
@@ -144,7 +142,7 @@ def get_node_and_edge(node, node_index_list, tokenizer, src, tgt, variable_token
 
 
 # generate pytorch_geometric input format data from ast
-def get_pyg_data_from_ast(ast, tokenizer):
+def get_pyg_data_from_ast(ast, tokenizer=ast_tokenizer):
     node_list = []
     sub_id_list = []  # record the ids of node that can be divide into multple subtokens
     leave_list = []  # record the ids of leave
@@ -221,11 +219,11 @@ def get_subgraph_node_num(root_children_node_num, divide_node_num, max_subgraph_
         return subgraph_node_num[: max_subgraph_num], max_subgraph_num
 
     # print(len(subgraph_node_num))
-    # if the last subgraph node num < divide_node_num, then put the last subgraph to the second to last subgraph
-    # if subgraph_node_num[-1] < divide_node_num:
-    #     subgraph_node_num[-2] = subgraph_node_num[-2] + subgraph_node_num[-1]
-    #     subgraph_node_num[-1] = 0
-    #     real_graph_num -= 1
+    # if the last subgraph node num < divide_node_num/2, then put the last subgraph to the second to last subgraph
+    if subgraph_node_num[-1] < divide_node_num/2:
+        subgraph_node_num[-2] = subgraph_node_num[-2] + subgraph_node_num[-1]
+        subgraph_node_num[-1] = 0
+        real_graph_num -= 1
 
     # zero padding for tensor transforming
     for _ in range(real_graph_num, max_subgraph_num):

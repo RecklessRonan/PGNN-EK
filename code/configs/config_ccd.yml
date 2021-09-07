@@ -1,0 +1,24 @@
+logs:
+  info_prefix: PGNN-EK|Code Clone Detection
+
+preprocess:
+  max_source_length: 400
+  divide_node_num: 30
+  max_node_num: 450
+
+model:
+  graph_embedding_size: 768
+  gnn_layers_num: 3
+  lstm_layers_num: 2
+  lstm_hidden_size: 768
+  decoder_input_size: 768
+  siamese_input_size: 768
+
+training:
+  batch_size: 4
+  lr: 0.00005
+  warmup_steps: 0
+  train_steps: 200000
+  weight_decay: 0.0
+  adam_epsilon: 0.00000001
+  valid_loss_steps: 5000
