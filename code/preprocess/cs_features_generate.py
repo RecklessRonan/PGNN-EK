@@ -5,18 +5,13 @@ import pandas as pd
 import argparse
 from sast_construct import get_subgraph_node_num, get_pyg_data_from_ast, parse_program
 from tqdm import tqdm
+import yaml
 import json
 
 
 parser = argparse.ArgumentParser(description='Generate features for model')
 parser.add_argument('--dataset', type=str, help='TLC or CSN')
-parser.add_argument('--divide_node_num', type=int, default=30, help='\lambda')
-parser.add_argument('--max_source_length', type=int,
-                    default=256, help='the max length of code')
-parser.add_argument('--max_target_length', type=int,
-                    default=32, help='the max length of code')
-parser.add_argument('--max_node_num', type=int,
-                    default=300, help='used to limit the max subgraph number')
+
 args = parser.parse_args()
 if args.dataset == 'TLC':
     dataset_url = '../../data/TLC/'
@@ -26,9 +21,14 @@ elif args.dataset == 'CSN':
     features_url = '../features/CSN/'
 else:
     print('Wrong dataset name')
-divide_node_num = args.divide_node_num
-max_source_length = args.max_source_length
-max_target_length = args.max_target_length
+
+# Configuration
+config_file = '../configs/config_cs.yml'
+config = yaml.load(open(config_file), Loader=yaml.FullLoader)
+max_source_length = config['preprocess']['max_source_length']
+max_target_length = config['preprocess']['max_target_length']
+divide_node_num = config['preprocess']['divide_node_num']
+max_node_num = config['preprocess']['max_node_num']
 max_subgraph_num = int(args.max_node_num/divide_node_num)
 
 

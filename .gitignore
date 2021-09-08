@@ -1,7 +1,7 @@
 .ipynb_checkpoints/
 __pycache__/
 codebert_checkpoint/
-features/
+features_raw/
 logs/
 origin_code/
 runs/

@@ -5,14 +5,10 @@ import pandas as pd
 import argparse
 from sast_construct import get_subgraph_node_num, get_pyg_data_from_ast, parse_program
 from tqdm import tqdm
+import yaml
 
 parser = argparse.ArgumentParser(description='Generate features for model')
 parser.add_argument('--dataset', type=str, help='BCB or BCB-F')
-parser.add_argument('--divide_node_num', type=int, default=30, help='\lambda')
-parser.add_argument('--max_source_length', type=int,
-                    default=400, help='the max length of code')
-parser.add_argument('--max_node_num', type=int,
-                    default=450, help='used to limit the max subgraph number')
 args = parser.parse_args()
 if args.dataset == 'BCB':
     dataset_url = '../../data/BCB/'
@@ -22,8 +18,12 @@ elif args.dataset == 'BCB-F':
     features_url = '../features/BCB-F/'
 else:
     print('Wrong dataset name')
-divide_node_num = args.divide_node_num
-max_source_length = args.max_source_length
+
+config_file = '../configs/config_cs.yml'
+config = yaml.load(open(config_file), Loader=yaml.FullLoader)
+max_source_length = config['preprocess']['max_source_length']
+divide_node_num = config['preprocess']['divide_node_num']
+max_node_num = config['preprocess']['max_node_num']
 max_subgraph_num = int(args.max_node_num/divide_node_num)
 
 
