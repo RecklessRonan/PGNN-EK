@@ -55,22 +55,22 @@ This implemetation is based on PyTorch. To run the code, you need the following 
 
 ## Run pipeline
 
-We use the code summarization task as example. The code clone detection task follows the similar pipeline.
+We use the code summarization task as example. The code clone detection task follows the similar pipeline. We conduct all experiments on two Tesla V100 GPUs.
 
-1.Enhance raw dataset with API description. You need to specify the dataset by setting args 'dataset'. This procedure will cost dozens of minutes. After that, you will see new enhanced data in the corresponding directory, for example, "data/CSN". You can download the raw dataset and enhanced dataset from [Google Drive](https://drive.google.com/drive/u/2/folders/10r5kkg6QNOhHkaoMVBXjprepd_LzuwDn).
+1.Enhance raw dataset with API description. You need to specify the dataset by setting args 'dataset'. This procedure will cost dozens of minutes. After that, you will see new enhanced data in the corresponding directory, for example, "data/CSN/". You can download the raw dataset and enhanced dataset from [Google Drive](https://drive.google.com/drive/u/2/folders/10r5kkg6QNOhHkaoMVBXjprepd_LzuwDn).
 
 ```python
 cd code/preprocess
 python3 cs_enhanced_with_API.py --dataset=CSN
 ```
 
-2.Construct S-AST and generate input features for the model. You need to specify the dataset by setting args 'dataset'. This procedure will cost 1-2 hours. After that, you will see new features data in the corresponding directory, for example, "code/features/CSN". You can download the processed features from Google Drive. For the limitation size(15G) of [Google drive](https://drive.google.com/drive/u/2/folders/10r5kkg6QNOhHkaoMVBXjprepd_LzuwDn), we can only provide the features of CSN and TLC.
+2.Construct S-AST and generate input features for the model. You need to specify the dataset by setting args 'dataset'. This procedure will cost 1-2 hours. After that, you will see new features data in the corresponding directory, for example, "code/features/CSN/". You can download the processed features from [Google Drive](https://drive.google.com/drive/u/2/folders/10r5kkg6QNOhHkaoMVBXjprepd_LzuwDn). For the limitation size(15G) of Google Drive, we can only provide the features of CSN and TLC.
 
 ```python
 python3 cs_features_generate.py --dataset=CSN
 ```
 
-3.Make final prediction. You need to specify dataset by setting args 'dataset'. Notice, you can experiment different hyperparamters by altering configs in "config_cs.yml" or "config_ccd.yml", such as 'divide_node_num', namely $\lambda$ that specifies the minimum number of nodes in the subgraph.
+3.Make the final prediction. You need to specify the dataset by setting args 'dataset'. This procedure will cost 1-2 days. Notice, you can experiment with different hyper-parameters by altering configs in "config_cs.yml" or "config_ccd.yml", such as 'divide_node_num', namely $\lambda$ that specifies the minimum number of nodes in the subgraph.
 
 ```python
 cd ../models
@@ -79,7 +79,7 @@ python3 run_cs.py --dataset=CSN
 
 ## BCB-F Construction
 
-We download the [BigCloneBench](https://github.com/clonebench/BigCloneBench) 2015 full database (postgresql) from [link](https://1drv.ms/u/s!AhXbM6MKt_yLkLF5_iiuoWhmQUScqg?e=yAEHI5).
+We download the [BigCloneBench](https://github.com/clonebench/BigCloneBench) 2015 full database (PostgreSQL) from [link](https://1drv.ms/u/s!AhXbM6MKt_yLkLF5_iiuoWhmQUScqg?e=yAEHI5).
 
 You can construct the BCB-F dataset after configuring PostgreSQL:
 
