@@ -70,11 +70,22 @@ python3 cs_enhanced_with_API.py --dataset=CSN
 python3 cs_features_generate.py --dataset=CSN
 ```
 
-3.Make final prediction. You need to specify dataset by setting args 'dataset'.
+3.Make final prediction. You need to specify dataset by setting args 'dataset'. Notice, you can experiment different hyperparamters by altering configs in "config_cs.yml" or "config_ccd.yml", such as 'divide_node_num', namely $\lambda$ that specifies the minimum number of nodes in the subgraph.
 
 ```python
 cd ../models
 python3 run_cs.py --dataset=CSN
+```
+
+## BCB-F Construction
+
+We download the [BigCloneBench](https://github.com/clonebench/BigCloneBench) 2015 full database (postgresql) from [link](https://1drv.ms/u/s!AhXbM6MKt_yLkLF5_iiuoWhmQUScqg?e=yAEHI5).
+
+You can construct the BCB-F dataset after configuring PostgreSQL:
+
+```python
+cd code/preprocess
+python3 bcbf_construct.py
 ```
 
 ## Attribution
