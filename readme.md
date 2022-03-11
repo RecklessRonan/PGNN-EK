@@ -1,6 +1,8 @@
 # PGNN-EK
 
-We provide our data in anonymous [Google Drive](https://drive.google.com/drive/folders/10r5kkg6QNOhHkaoMVBXjprepd_LzuwDn?usp=sharing).
+This is the official implementation of ACL 2022 Paper Can Neural Networks Understand Programs like Humans?
+
+We provide our data in [Google Drive](https://drive.google.com/drive/folders/10r5kkg6QNOhHkaoMVBXjprepd_LzuwDn?usp=sharing).
 
 ## Setup
 
