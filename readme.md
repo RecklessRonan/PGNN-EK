@@ -1,6 +1,6 @@
 # PGNN-EK
 
-This is the official implementation of ACL 2022 Paper ***Can Neural Networks Understand Programs like Humans?***
+This is the official implementation of ACL 2022 Paper ***A Neural Network Architecture for Program Understanding Inspired by Human Behaviors***
 
 We provide our data in [Google Drive](https://drive.google.com/drive/folders/10r5kkg6QNOhHkaoMVBXjprepd_LzuwDn?usp=sharing).
 
