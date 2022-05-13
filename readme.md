@@ -36,7 +36,6 @@ This implemetation is based on PyTorch. To run the code, you need the following 
     |   |-- bleu.py # calculate bleu in cs
     |   |-- codebert_seq2seq.py # the seq2seq model for cs
     |   |-- pgnn.py # partitioning-based graph neural network
-    |   |-- run_ccd.py # run ccd
     |   |-- run_cs.py # run cs
     |-- preprocess # preprocessing
         |-- api_match.py # match API
