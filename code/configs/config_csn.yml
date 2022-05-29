@@ -15,10 +15,10 @@ model:
   decoder_input_size: 768
 
 training:
-  batch_size: 16
+  batch_size: 24
   beam_size: 10
   lr: 0.00005
-  gnn_lr: 0.00005
+  gnn_lr: 0.0001
   warmup_steps: 0
   train_steps: 50000
   weight_decay: 0.0
