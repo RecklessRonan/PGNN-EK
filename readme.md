@@ -98,3 +98,17 @@ Parts of this code are based on the following repositories:
 - [code2seq](https://github.com/m3yrin/code2seq)
 
 - [FA-AST](https://github.com/jacobwwh/graphmatch_clone)
+
+# Citation
+
+if you find this code working for you, please cite:
+
+```python
+@inproceedings{zhu2022neural,
+  title={A Neural Network Architecture for Program Understanding Inspired by Human Behaviors},
+  author={Zhu, Renyu and Yuan, Lei and Li, Xiang and Gao, Ming and Cai, Wenyuan},
+  booktitle={Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
+  pages={5142--5153},
+  year={2022}
+}
+```
