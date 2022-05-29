@@ -20,6 +20,12 @@ This implemetation is based on Python 3.7. To run the code, you need the followi
 - pandas==1.3.5
 - nltk==3.5
 
+Or you can simply run:
+
+```python
+pip install -r requirements.txt
+```
+
 ## Repository structure
 
 ```python
