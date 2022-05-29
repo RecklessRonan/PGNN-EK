@@ -29,20 +29,21 @@ args = parser.parse_args()
 if args.dataset == 'TLC':
     dataset_url = '../../data/TLC/'
     features_url = '../features/TLC/'
+    config_file = '../configs/config_cs_tlc.yml'
 elif args.dataset == 'CSN':
     dataset_url = '../../data/CSN/'
     features_url = '../features/CSN/'
+    config_file = '../configs/config_cs_csn.yml'
 else:
     print('Wrong dataset name')
 
 # Configuration
-config_file = '../configs/config_cs.yml'
 config = yaml.load(open(config_file), Loader=yaml.FullLoader)
 info_prefix = config['logs']['info_prefix']
 # Data source
-TRAIN_DIR = dataset_url + 'train.jsonl'
-VALID_DIR = dataset_url + 'valid.jsonl'
-TEST_DIR = dataset_url + 'test.jsonl'
+TRAIN_DIR = dataset_url + 'train_enhanced.jsonl'
+VALID_DIR = dataset_url + 'valid_enhanced.jsonl'
+TEST_DIR = dataset_url + 'test_enhanced.jsonl'
 # Preprocess
 max_source_length = config['preprocess']['max_source_length']
 max_target_length = config['preprocess']['max_target_length']
@@ -59,6 +60,7 @@ decoder_input_size = config['model']['decoder_input_size']
 batch_size = config['training']['batch_size']
 beam_size = config['training']['beam_size']
 lr = config['training']['lr']
+gnn_lr = config['training']['gnn_lr']
 warmup_steps = config['training']['warmup_steps']
 train_steps = config['training']['train_steps']
 weight_decay = config['training']['weight_decay']
@@ -142,7 +144,8 @@ test_features = torch.load(
 
 
 # Load CodeBERT related
-checkpoint = 'microsoft/codebert-base'
+# checkpoint = 'microsoft/codebert-base'
+checkpoint = '/home/hadoop-aipnlp/dolphinfs/hdd_pool/data/zhurenyu/huggingface-models/codebert'
 tokenizer = RobertaTokenizer.from_pretrained(checkpoint)
 ast_tokenizer = RobertaTokenizer.from_pretrained(checkpoint)
 roberta = RobertaModel.from_pretrained(checkpoint)
@@ -168,37 +171,41 @@ num_added_toks = ast_tokenizer.add_special_tokens(special_tokens_dict)
 
 
 # Model Initilization
-device = torch.device('cuda: 0')
+
+device = torch.device('cuda:1')
 gnn_encoder = GNNEncoder(vocab_len=tokenizer.vocab_size+num_added_toks, graph_embedding_size=graph_embedding_size,
                          gnn_layers_num=gnn_layers_num, lstm_layers_num=lstm_layers_num, lstm_hidden_size=lstm_hidden_size,
                          decoder_input_size=decoder_input_size, device=device)
 decoder_layer = TransformerDecoderLayer(
-    d_model=config.hidden_size, nhead=config.num_attention_heads)
+    d_model=roberta_config.hidden_size, nhead=roberta_config.num_attention_heads)
 decoder = TransformerDecoder(decoder_layer, num_layers=6)
 model = Seq2Seq(encoder=roberta, decoder=decoder, gnn_encoder=gnn_encoder, config=roberta_config, beam_size=10, max_length=max_target_length,
                 sos_id=tokenizer.cls_token_id, eos_id=tokenizer.sep_token_id)
 model.to(device)
+# print(model)
 
 
 # optimizer and schedule
 no_decay = ['bias', 'LayerNorm.weight']
+all_param_optimizer = list(model.named_parameters())
+gnn_param_optimizer = list(model.gnn_encoder.named_parameters())
+other_param_optimizer = []
+
+for op in all_param_optimizer:
+    # print(op[0])
+    if 'gnn_encoder' not in op[0]:
+        other_param_optimizer.append(op)
+
 optimizer_grouped_parameters = [
-    {
-        'params': [
-            p
-            for n, p in model.named_parameters()
-            if all(nd not in n for nd in no_decay)
-        ],
-        'weight_decay': weight_decay,
-    },
-    {
-        'params': [
-            p
-            for n, p in model.named_parameters()
-            if any(nd in n for nd in no_decay)
-        ],
-        'weight_decay': 0.0,
-    },
+    {'params': [p for n, p in other_param_optimizer if not any(nd in n for nd in no_decay)],
+        'weight_decay': weight_decay, 'lr': lr},
+    {'params': [p for n, p in other_param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0,
+        'lr': lr},
+    
+    {'params': [p for n, p in gnn_param_optimizer if not any(nd in n for nd in no_decay)],
+        'weight_decay': weight_decay, 'lr': gnn_lr},
+    {'params': [p for n, p in gnn_param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0,
+        'lr': gnn_lr}
 ]
 
 optimizer = AdamW(optimizer_grouped_parameters, lr=lr, eps=adam_epsilon)
@@ -206,7 +213,6 @@ optimizer = AdamW(optimizer_grouped_parameters, lr=lr, eps=adam_epsilon)
 #                                             num_training_steps=30000)
 scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=warmup_steps,
                                             num_training_steps=train_steps)
-
 
 # Start training
 msgr.print_msg("***** Running training *****")
@@ -217,14 +223,17 @@ msgr.print_msg("  Num epoch = {}".format(batch_size//len(train_features)))
 model.train()
 valid_dataset = {}
 nb_tr_examples, nb_tr_steps, tr_loss, global_step, best_bleu, best_loss = 0, 0, 0, 0, 0, 1e6
-bar = tqdm(range(train_steps), total=train_steps)
+# bar = tqdm(range(train_steps), total=train_steps)
 train_dataloader = DataLoader(train_features, batch_size=batch_size)
 train_dataloader = cycle(train_dataloader)
 output_dir = exp_dir
 
-for step in bar:
+# for step in bar:
+for step in range(train_steps):
     data = next(train_dataloader)
     data = data.to(device)
+    # print(torch.split(
+    #     data.subgraph_node_num, max_subgraph_num))
     subgraph_node_num = torch.stack(torch.split(
         data.subgraph_node_num, max_subgraph_num))
     real_graph_num = torch.stack(torch.split(data.real_graph_num, 1))
@@ -238,7 +247,9 @@ for step in bar:
 
     tr_loss += loss.item()
     train_loss = round(tr_loss / (nb_tr_steps + 1), 4)
-    bar.set_description('loss {}'.format(train_loss))
+    # bar.set_description('loss {}'.format(train_loss))
+    msgr.print_msg("train loss= {}".format(train_loss))
+
     nb_tr_examples += data.x.size(0)
     nb_tr_steps += 1
     loss.backward()
@@ -372,9 +383,10 @@ for step in bar:
 
 
 # nltk used for TLC
+# we follow the original code in TLC 'evaluation.py'
 def nltk_sentence_bleu(hypothesis, reference, order=4):
     cc = SmoothingFunction()
-    return nltk.translate.bleu([reference], hypothesis, smoothing_function=cc.method0)
+    return nltk.translate.bleu([reference], hypothesis, smoothing_function=cc.method4)
 
 
 def nltk_corpus_bleu(hypotheses, references, order=4):
@@ -396,7 +408,9 @@ def nltk_corpus_bleu(hypotheses, references, order=4):
 
 # Test
 def test(checkpoint_name):
-    model_name = output_dir + checkpoint_name
+    checkpoint_dir = os.path.join(output_dir, checkpoint_name) 
+    model_name = checkpoint_dir + '/pytorch_model.bin'
+
     model.load_state_dict(torch.load(model_name))
     model.eval()
     p = []
@@ -421,36 +435,36 @@ def test(checkpoint_name):
                 p.append(text)
     model.train()
     predictions = []
-    with open(os.path.join(output_dir, "test.output"), 'w', encoding='utf-8') as f, open(os.path.join(output_dir, "test.gold"), 'w', encoding='utf-8') as f1:
+    with open(os.path.join(checkpoint_dir, "test.output"), 'w', encoding='utf-8') as f, open(os.path.join(checkpoint_dir, "test.gold"), 'w', encoding='utf-8') as f1:
         for ref, gold in zip(p, test_examples):
             predictions.append(str(gold.idx)+'\t'+ref)
             f.write(str(gold.idx)+'\t'+ref+'\n')
             f1.write(str(gold.idx)+'\t'+gold.target+'\n')
 
     (goldMap, predictionMap) = bleu.computeMaps(
-        predictions, os.path.join(output_dir, "test.gold"))
+        predictions, os.path.join(checkpoint_dir, "test.gold"))
 
     if args.dataset == 'TLC':
-        new_golds = []
-        golds = []
-        with open(os.path.join(output_dir, "test.gold"), 'r', encoding='utf-8') as f:
-            for v in f.readlines():
-                golds.append(v)
-        for g in golds:
-            t = tokenizer.tokenize(g.split('\t', 1)[1])[: 30]
-            ids = tokenizer.convert_tokens_to_ids(t)
-            tt = tokenizer.decode(ids, clean_up_tokenization_spaces=False)
-            if not tt.endswith('\n'):
-                tt += '\n'
-            new_golds.append(str(g.split('\t', 1)[0])+'\t'+tt)
-        nltk_golds = []
-        nltk_preds = []
-        for g, p in zip(new_golds, predictions):
-            nltk_golds.append(g.split('\t', 1)[1])
-            nltk_preds.append(p.split('\t', 1)[1])
-        dev_bleu = nltk_corpus_bleu(nltk_golds, nltk_preds)[1] * 100
+      new_golds = []
+      golds = []
+      with open(os.path.join(checkpoint_dir, "test.gold"), 'r', encoding='utf-8') as f:
+          for v in f.readlines():
+              golds.append(v)
+      for g in golds:
+          t = tokenizer.tokenize(g.split('\t', 1)[1])[: 30]
+          ids = tokenizer.convert_tokens_to_ids(t)
+          tt = tokenizer.decode(ids, clean_up_tokenization_spaces=False)
+          if not tt.endswith('\n'):
+              tt += '\n'
+          new_golds.append(str(g.split('\t', 1)[0])+'\t'+tt)
+      nltk_golds = []
+      nltk_preds = []
+      for g, p in zip(new_golds, predictions):
+          nltk_golds.append(g.split('\t', 1)[1])
+          nltk_preds.append(p.split('\t', 1)[1])
+      dev_bleu = nltk_corpus_bleu(nltk_golds, nltk_preds)[1] * 100
     else:
-        dev_bleu = round(bleu.bleuFromMaps(goldMap, predictionMap)[0], 2)
+      dev_bleu = round(bleu.bleuFromMaps(goldMap, predictionMap)[0], 2)
     msgr.print_msg(" {} = {} ".format("bleu-4", str(dev_bleu)))
     msgr.print_msg("  "+"*"*20)
 
@@ -464,7 +478,7 @@ msgr.print_msg("\n***** Running testing *****")
 msgr.print_msg("  Num examples = {}".format(len(test_features)))
 msgr.print_msg("  Batch size = {}".format(batch_size))
 
-checkpoint_list = ['/checkpoint-best-ppl/pytorch_model.bin',
-                   '/checkpoint-best-f1/pytorch_model.bin', '/checkpoint-last/pytorch_model.bin']
+checkpoint_list = ['checkpoint-best-ppl',
+                   'checkpoint-best-bleu', 'checkpoint-last']
 for c in checkpoint_list:
     test(checkpoint_name=c)
