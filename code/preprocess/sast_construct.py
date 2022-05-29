@@ -50,8 +50,7 @@ def parse_program(func):
     return tree
 
 
-# checkpoint = 'microsoft/codebert-base'
-checkpoint = '/home/hadoop-aipnlp/dolphinfs/hdd_pool/data/zhurenyu/huggingface-models/codebert'
+checkpoint = 'microsoft/codebert-base'
 tokenizer = RobertaTokenizer.from_pretrained(checkpoint)
 ast_tokenizer = RobertaTokenizer.from_pretrained(checkpoint)
 roberta = RobertaModel.from_pretrained(checkpoint)
