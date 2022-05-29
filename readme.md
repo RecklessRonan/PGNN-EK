@@ -1,7 +1,3 @@
-# 5.13 Update
-
-This is the version we submitted in 2021.9. There are some bugs and we will fix them soon.
-
 # PGNN-EK
 
 This is the official implementation of ACL 2022 Paper ***A Neural Network Architecture for Program Understanding Inspired by Human Behaviors***
@@ -10,19 +6,19 @@ We provide our data in [Google Drive](https://drive.google.com/drive/folders/10r
 
 ## Setup
 
-This implemetation is based on PyTorch. To run the code, you need the following dependencies:
+This implemetation is based on Python 3.7. To run the code, you need the following dependencies:
 
-- PyTorch==1.5.1
-
-- PyTorch Geometric==1.7.0
-
-- Transformers==4.8.2
-
-- javalang==0.11.0
-
+- torch=1.7.0+cu110
+- torch-cluster==1.5.9
+- torch-scatter==2.0.5
+- torch-spline-conv==1.2.0
+- torch-sparse==0.6.8
+- torch-geometric==2.0.4
+- transformers==4.18.0
+- javalang==0.13.0
 - anytree==2.8.0
-
-- pandas==0.25.3
+- pandas==1.3.5
+- nltk==3.5
 
 ## Repository structure
 
@@ -45,7 +41,6 @@ This implemetation is based on PyTorch. To run the code, you need the following 
         |-- api_match.py # match API
         |-- bcbf_construct.py # construct BCB-F
         |-- ccd_enhanced_with_api.py # enhance ccd dataset with API description
-        |-- ccd_features_generate.py # generate processed features for ccd
         |-- cs_enhanced_with_api.py # enhance cs dataset with API description
         |-- cs_features_generate.py # generate processed features for cs
         |-- get_javaapi.py # get java API from documentation
@@ -89,6 +84,7 @@ We download the [BigCloneBench](https://github.com/clonebench/BigCloneBench) 201
 You can construct the BCB-F dataset after configuring PostgreSQL:
 
 ```python
+!pip install psycopg2
 cd code/preprocess
 python3 bcbf_construct.py
 ```
