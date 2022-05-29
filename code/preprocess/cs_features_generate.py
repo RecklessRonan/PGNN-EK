@@ -16,20 +16,23 @@ args = parser.parse_args()
 if args.dataset == 'TLC':
     dataset_url = '../../data/TLC/'
     features_url = '../features/TLC/'
+    config_file = '../configs/config_cs_tlc.yml'
+
 elif args.dataset == 'CSN':
     dataset_url = '../../data/CSN/'
     features_url = '../features/CSN/'
+    config_file = '../configs/config_cs_csn.yml'
+
 else:
     print('Wrong dataset name')
 
 # Configuration
-config_file = '../configs/config_cs.yml'
 config = yaml.load(open(config_file), Loader=yaml.FullLoader)
 max_source_length = config['preprocess']['max_source_length']
 max_target_length = config['preprocess']['max_target_length']
 divide_node_num = config['preprocess']['divide_node_num']
 max_node_num = config['preprocess']['max_node_num']
-max_subgraph_num = int(args.max_node_num/divide_node_num)
+max_subgraph_num = int(max_node_num/divide_node_num)
 
 
 # define tokenizer
@@ -91,13 +94,13 @@ def read_examples(filename):
             )
     return examples
 
-
 train_examples = read_examples(dataset_url +
                                'train_enhanced.jsonl')
 valid_examples = read_examples(dataset_url +
                                'valid_enhanced.jsonl')
 test_examples = read_examples(dataset_url +
                               'test_enhanced.jsonl')
+
 
 
 def convert_examples_to_features(examples, ast_tokenizer, tokenizer, stage=None):
@@ -135,6 +138,15 @@ def convert_examples_to_features(examples, ast_tokenizer, tokenizer, stage=None)
         target_ids += [tokenizer.pad_token_id] * padding_length
         target_mask += [0] * padding_length
 
+        # print('x:', x)
+        # print('edge_index:', edge_index)
+        # print('edge_attr:', edge_attr)
+        # print('source_ids:', source_ids)
+        # print('source_mask:', source_mask)
+        # print('target_ids:', target_ids)
+        # print('target_mask:', target_mask)
+        # print('subgraph_node_num:', subgraph_node_num)
+        # print('real_graph_num:', real_graph_num)
         features.append(
             Data(
                 x=torch.tensor(x, dtype=torch.long),
