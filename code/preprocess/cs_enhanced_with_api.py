@@ -16,9 +16,11 @@ else:
 
 
 # read data and java api
-train_url = dataset_url + 'train.jsonl'
-valid_url = dataset_url + 'valid.jsonl'
-test_url = dataset_url + 'test.jsonl'
+train_url = dataset_url + 'train.json'
+valid_url = dataset_url + 'valid.json'
+test_url = dataset_url + 'test.json'
+
+# print(train_url)
 
 train_data = pd.read_json(path_or_buf=train_url, lines=True)
 valid_data = pd.read_json(path_or_buf=valid_url, lines=True)
