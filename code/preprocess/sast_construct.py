@@ -50,7 +50,8 @@ def parse_program(func):
     return tree
 
 
-checkpoint = 'microsoft/codebert-base'
+# checkpoint = 'microsoft/codebert-base'
+checkpoint = '/home/hadoop-aipnlp/dolphinfs/hdd_pool/data/zhurenyu/huggingface-models/codebert'
 tokenizer = RobertaTokenizer.from_pretrained(checkpoint)
 ast_tokenizer = RobertaTokenizer.from_pretrained(checkpoint)
 roberta = RobertaModel.from_pretrained(checkpoint)
@@ -220,13 +221,12 @@ def get_subgraph_node_num(root_children_node_num, divide_node_num, max_subgraph_
 
     # print(len(subgraph_node_num))
     # if the last subgraph node num < divide_node_num/2, then put the last subgraph to the second to last subgraph
-    if subgraph_node_num[-1] < divide_node_num/2:
+    if subgraph_node_num[-1] < divide_node_num/2 and len(subgraph_node_num) > 1:
         subgraph_node_num[-2] = subgraph_node_num[-2] + subgraph_node_num[-1]
-        subgraph_node_num[-1] = 0
+        subgraph_node_num.pop() # remove the last element
         real_graph_num -= 1
 
-    # zero padding for tensor transforming
     for _ in range(real_graph_num, max_subgraph_num):
-        subgraph_node_num.append(0)
+            subgraph_node_num.append(0)
 
     return subgraph_node_num, real_graph_num
