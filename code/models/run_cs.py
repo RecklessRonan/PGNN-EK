@@ -445,26 +445,26 @@ def test(checkpoint_name):
         predictions, os.path.join(checkpoint_dir, "test.gold"))
 
     if args.dataset == 'TLC':
-      new_golds = []
-      golds = []
-      with open(os.path.join(checkpoint_dir, "test.gold"), 'r', encoding='utf-8') as f:
-          for v in f.readlines():
-              golds.append(v)
-      for g in golds:
-          t = tokenizer.tokenize(g.split('\t', 1)[1])[: 30]
-          ids = tokenizer.convert_tokens_to_ids(t)
-          tt = tokenizer.decode(ids, clean_up_tokenization_spaces=False)
-          if not tt.endswith('\n'):
-              tt += '\n'
-          new_golds.append(str(g.split('\t', 1)[0])+'\t'+tt)
-      nltk_golds = []
-      nltk_preds = []
-      for g, p in zip(new_golds, predictions):
-          nltk_golds.append(g.split('\t', 1)[1])
-          nltk_preds.append(p.split('\t', 1)[1])
-      dev_bleu = nltk_corpus_bleu(nltk_golds, nltk_preds)[1] * 100
+        new_golds = []
+        golds = []
+        with open(os.path.join(checkpoint_dir, "test.gold"), 'r', encoding='utf-8') as f:
+            for v in f.readlines():
+                golds.append(v)
+        for g in golds:
+            t = tokenizer.tokenize(g.split('\t', 1)[1])[: 30]
+            ids = tokenizer.convert_tokens_to_ids(t)
+            tt = tokenizer.decode(ids, clean_up_tokenization_spaces=False)
+            if not tt.endswith('\n'):
+                tt += '\n'
+            new_golds.append(str(g.split('\t', 1)[0])+'\t'+tt)
+        nltk_golds = []
+        nltk_preds = []
+        for g, p in zip(new_golds, predictions):
+            nltk_golds.append(g.split('\t', 1)[1])
+            nltk_preds.append(p.split('\t', 1)[1])
+        dev_bleu = nltk_corpus_bleu(nltk_golds, nltk_preds)[1] * 100
     else:
-      dev_bleu = round(bleu.bleuFromMaps(goldMap, predictionMap)[0], 2)
+        dev_bleu = round(bleu.bleuFromMaps(goldMap, predictionMap)[0], 2)
     msgr.print_msg(" {} = {} ".format("bleu-4", str(dev_bleu)))
     msgr.print_msg("  "+"*"*20)
 
