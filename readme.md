@@ -97,9 +97,9 @@ python3 bcbf_construct.py
 
 Here is an example of BCB-F data:
 ```python
-20643742	  23677117	     0	      4
-code1_index   code2_index  label  function_id
+20643742	23677117	0	4
 ```
+From left to right: code1 index, code2 index, label, functionality id.
 
 ## Attribution
 
