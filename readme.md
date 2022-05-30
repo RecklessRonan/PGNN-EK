@@ -95,6 +95,12 @@ cd code/preprocess
 python3 bcbf_construct.py
 ```
 
+Here is an example of BCB-F data:
+```python
+20643742	  23677117	     0	      4
+code1_index   code2_index  label  function_id
+```
+
 ## Attribution
 
 Parts of this code are based on the following repositories:
