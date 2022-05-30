@@ -82,34 +82,31 @@ pos_pair = bcb2015_pair_df[~bcb2015_pair_df['label'].isin([0])]
 
 # divide train/valid/test by functionality
 train_df = bcb2015_pair_df[~bcb2015_pair_df['func_id'].isin(
-    [7, 6, 30, 17, 26, 25, 45, 22, 34, 35, 14, 10, 13, 43, 44, 29, 18, 12, 40, 24])]
+    [7, 3, 17, 27, 13, 38, 43, 9, 6, 14, 30, 36, 10, 23, 12, 15, 42, 33, 19, 2, 26])]
 valid_df = bcb2015_pair_df[bcb2015_pair_df['func_id'].isin(
-    [7, 6, 30, 17, 26, 25, 45, 22, 34, 35, 14])]
+    [7, 3, 17, 27, 13, 38, 43, 9, 6, 14, 30])]
 test_df = bcb2015_pair_df[bcb2015_pair_df['func_id'].isin(
-    [10, 13, 43, 44, 29, 18, 12, 40, 24])]
+    [36, 10, 23, 12, 15, 42, 33, 19, 2, 26])]
 
 
 train_neg_label = train_df[(train_df['label'] == 0)]
 train_pos_label = train_df[~(train_df['label'] == 0)].sample(
     len(train_neg_label), random_state=555)
 train_label = pd.concat([train_pos_label, train_neg_label], axis=0)
-train_label = train_label.sample(frac=1, random_state=555).drop(
-    ['func_id'], axis=1).reset_index(drop=True)
+train_label = train_label.sample(frac=1, random_state=555).reset_index(drop=True)
 
 
 valid_neg_label = valid_df[(valid_df['label'] == 0)]
 valid_pos_label = valid_df[~(valid_df['label'] == 0)].sample(
     len(valid_neg_label), random_state=555)
 valid_label = pd.concat([valid_pos_label, valid_neg_label], axis=0)
-valid_label = valid_label.sample(frac=1, random_state=555).drop(
-    ['func_id'], axis=1).reset_index(drop=True)
+valid_label = valid_label.sample(frac=1, random_state=555).reset_index(drop=True)
 
 test_neg_label = test_df[(test_df['label'] == 0)]
 test_pos_label = test_df[~(test_df['label'] == 0)].sample(
     len(test_neg_label), random_state=555)
 test_label = pd.concat([test_pos_label, test_neg_label], axis=0)
-test_label = test_label.sample(frac=1, random_state=555).drop(
-    ['func_id'], axis=1).reset_index(drop=True)
+test_label = test_label.sample(frac=1, random_state=555).reset_index(drop=True)
 
 
 train_str = ''
@@ -119,6 +116,8 @@ for i in range(len(train_label)):
     train_str += str(train_label['id2'][i])
     train_str += '\t'
     train_str += '0' if train_label['label'][i] == 0 else '1'
+    train_str += '\t'
+    train_str += str(train_label['func_id'][i])
     train_str += '\n'
 
 with open('../../data/BCB-F/train.txt', 'w', encoding='utf-8') as f:
@@ -132,6 +131,8 @@ for i in range(len(valid_label)):
     valid_str += str(valid_label['id2'][i])
     valid_str += '\t'
     valid_str += '0' if valid_label['label'][i] == 0 else '1'
+    valid_str += '\t'
+    valid_str += str(valid_label['func_id'][i])
     valid_str += '\n'
 
 with open('../../data/BCB-F/valid.txt', 'w', encoding='utf-8') as f:
@@ -144,6 +145,8 @@ for i in range(len(test_label)):
     test_str += str(test_label['id2'][i])
     test_str += '\t'
     test_str += '0' if test_label['label'][i] == 0 else '1'
+    test_str += '\t'
+    test_str += str(test_label['func_id'][i])
     test_str += '\n'
 
 with open('../../data/BCB-F/test.txt', 'w', encoding='utf-8') as f:
