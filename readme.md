@@ -76,7 +76,7 @@ python3 cs_enhanced_with_API.py --dataset=CSN
 python3 cs_features_generate.py --dataset=CSN
 ```
 
-3.Make the final prediction. You need to specify the dataset by setting args 'dataset'. This procedure will cost 1-2 days. Notice, you can experiment with different hyper-parameters by altering configs in "config_cs.yml" or "config_ccd.yml", such as 'divide_node_num', namely $\lambda$ that specifies the minimum number of nodes in the subgraph.
+3.Make the final prediction. You need to specify the dataset by setting args 'dataset'. This procedure will cost 1-2 days. Notice, you can experiment with different hyper-parameters by altering configs in "config_cs_tlc.yml" or "config_cs_csn.yml", such as 'divide_node_num', namely $\lambda$ that specifies the minimum number of nodes in the subgraph.
 
 ```python
 cd ../models
