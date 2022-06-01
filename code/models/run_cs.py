@@ -326,7 +326,7 @@ for step in range(train_steps):
                 best_output_dir, "pytorch_model.bin")
             torch.save(model_to_save.state_dict(), output_model_file)
 
-    if (global_step + 1) % valid_bleu_steps == 0:
+    if (global_step + 1) % valid_bleu_steps == 0 and (global_step + 1) >= train_steps * 0.6:
         model.eval()
         p = []
         for data in valid_dataloader:
