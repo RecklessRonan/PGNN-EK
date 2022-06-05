@@ -9,7 +9,7 @@ class GNNEncoder(Module):
         super(GNNEncoder, self).__init__()
         self.device = device
         self.embeddings = Embedding(vocab_len, graph_embedding_size)
-        # only two edge types to be set weights, which are AST edge and data flow edge
+        # four edge types to be set weights, which are AST edge, data flow edge, leave edge and subtoken edge
         self.edge_embed = Embedding(4, 1)
         self.ggnnlayer = GatedGraphConv(graph_embedding_size, gnn_layers_num)
         self.mlp_gate = Sequential(
